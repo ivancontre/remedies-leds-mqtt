@@ -11,26 +11,26 @@ WiFiClient espClient;
 PubSubClient client(espClient);
 
 // Servos init
-const int pinLedMondayA = 12;
-const int pinLedMondayB = 13;
+const int pinLedMondayA = 22;
+const int pinLedMondayB = 21;
 
-const int pinLedTuesdayA = 14;
-const int pinLedTuesdayB = 27;
+const int pinLedTuesdayA = 19;
+const int pinLedTuesdayB = 18;
 
-const int pinLedWednesdayA = 26;
-const int pinLedWednesdayB = 23; //25
+const int pinLedWednesdayA = 17;
+const int pinLedWednesdayB = 16; //25
 
-const int pinLedThursdayA = 33;
-const int pinLedThursdayB = 32;
+const int pinLedThursdayA = 32;
+const int pinLedThursdayB = 33;
 
-const int pinLedFridayA = 16;
-const int pinLedFridayB = 17;
+const int pinLedFridayA = 23;
+const int pinLedFridayB = 26;
 
-const int pinLedSaturdayA = 18;
-const int pinLedSaturdayB = 19;
+const int pinLedSaturdayA = 27;
+const int pinLedSaturdayB = 14;
 
-const int pinLedSundayA = 21;
-const int pinLedSundayB = 22;
+const int pinLedSundayA = 13;
+const int pinLedSundayB = 12;
 
 const int pinLedWifi = 4;
 const int pinLedMqtt = 5;
@@ -41,13 +41,14 @@ void setup() {
   pinMode(pinLedWifi, OUTPUT);
   pinMode(pinLedMqtt, OUTPUT);
 
-  connectWifi();  
-
-  connectMqtt(); 
-
   attachLeds();
 
+  connectWifi();  
+
   getStatus();
+
+  connectMqtt(); 
+   
 }
 
 void loop() {
@@ -62,6 +63,9 @@ void loop() {
 
 void connectWifi() {
   // connecting to a WiFi network
+  WiFi.mode(WIFI_STA);
+  Serial.println(ssid);
+  Serial.println(password);
   WiFi.begin(ssid, password);
   while (WiFi.status() != WL_CONNECTED) {
      delay(1000);
@@ -77,10 +81,10 @@ void connectWifi() {
 void connectMqtt() {
     //connecting to a mqtt broker
    client.setServer(mqtt_broker, mqtt_port);
+   //client.setServer(server, 1883);
    client.setCallback(callback);
    while (!client.connected()) {
-       String client_id = "esp32-client-";
-       client_id += String(WiFi.macAddress());
+       String client_id = idEsp32;
        Serial.printf("The client %s connects to the public mqtt broker\n", client_id.c_str());
        if (client.connect(client_id.c_str(), mqtt_username, mqtt_password)) {
           digitalWrite(pinLedMqtt, HIGH);
@@ -102,8 +106,7 @@ void connectMqtt() {
 void reconnect() {
   while (!client.connected()) {
     Serial.print("Intentando reconectarse MQTT...");
-    String client_id = "esp32-client-";
-    client_id += String(WiFi.macAddress());
+    String client_id = idEsp32;
     Serial.printf("The client %s connects to the public mqtt broker\n", client_id.c_str());
     if (client.connect(client_id.c_str(), mqtt_username, mqtt_password)) {
       digitalWrite(pinLedMqtt, HIGH);
